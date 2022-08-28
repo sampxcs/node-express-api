@@ -1,0 +1,23 @@
+// Get all persons
+GET http://localhost:3001/persons
+
+###
+
+// Get person by Id
+GET http://localhost:3001/persons/1
+
+###
+
+// Delete person
+DELETE http://localhost:3001/persons/3
+
+###
+
+// Post person
+POST http://localhost:3001/persons
+content-type: application/json
+
+{
+    "name": "sample",
+    "number": "333-0032000"
+}
