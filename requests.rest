@@ -4,12 +4,12 @@ GET http://localhost:3001/persons
 ###
 
 // Get person by Id
-GET http://localhost:3001/persons/1
+GET http://localhost:3001/persons/630bf5491c43e127af5bef99
 
 ###
 
 // Delete person
-DELETE http://localhost:3001/persons/3
+DELETE http://localhost:3001/persons/630c09c1470a9f0345246b4b
 
 ###
 
@@ -20,4 +20,15 @@ content-type: application/json
 {
     "name": "sample",
     "number": "333-0032000"
+}
+
+###
+
+// Put person
+PUT http://localhost:3001/persons/630bf5491c43e127af5bef51
+content-type: application/json
+
+{
+    "name": "Ian",
+    "number": "11-23913641"
 }

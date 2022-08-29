@@ -1,7 +1,13 @@
+require('dotenv').config()
+require('./mongo.js')
+
 const express = require('express')
 const cors = require('cors')
-const logger = require('./loggerMiderware')
-const db = require('./db.json')
+const Person = require('./models/Person')
+
+const logger = require('./middleware/logger')
+const handleErrors = require('./middleware/handleErrors')
+const notFound = require('./middleware/notFound')
 
 const app = express()
 
@@ -10,31 +16,29 @@ app.use(express.json())
 app.use(logger)
 
 app.get('/', (request, response) => {
-  response.json(db)
-})
-
-app.get('/persons', (request, response) => {
-  response.json(db.persons)
-})
-
-app.get('/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = db.persons.find((person) => person.id === id)
-  response.json(person || {
-    error: 'not found'
+  Person.find({}).then(result => {
+    response.json(result)
   })
 })
 
-app.delete('/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  db.persons = db.persons.filter((person) => person.id !== id)
-  response.status(204).end()
+app.get('/persons', (request, response) => {
+  Person.find({}).then(result => {
+    response.json(result)
+  })
 })
 
-app.post('/persons', (request, response) => {
+app.get('/persons/:id', (request, response, next) => {
+  const id = request.params.id
+  Person.findById(id).then(result => {
+    result ? response.json(result) : next()
+  }).catch(error => {
+    next(error)
+  })
+})
+
+app.put('/persons/:id', (request, response, next) => {
+  const { id } = request.params
   const person = request.body
-  const ids = db.persons.map((person) => person.id)
-  const maxId = Math.max(...ids)
 
   if (!Object.entries(person).length) {
     return response.status(400).json({
@@ -42,23 +46,48 @@ app.post('/persons', (request, response) => {
     })
   }
 
-  const newPerson = {
+  const newPersonInfo = {
     name: person.name,
-    number: person.number,
-    id: maxId + 1
+    number: person.number
   }
 
-  db.persons = [...db.persons, newPerson]
-  response.status(201).json(newPerson)
-})
-
-app.use((request, response) => {
-  response.status(404).json({
-    error: 'not found'
+  Person.findByIdAndUpdate(id, newPersonInfo, { new: true }).then(result => {
+    result ? response.status(200).json(result) : next()
+  }).catch(error => {
+    next(error)
   })
 })
 
-const PORT = process.env.PORT || 3001
+app.delete('/persons/:id', (request, response, next) => {
+  const { id } = request.params
+  Person.findByIdAndDelete(id).then(result => {
+    result ? response.status(204).end() : next()
+  }).catch(error => {
+    next(error)
+  })
+})
+
+app.post('/persons', (request, response) => {
+  const person = request.body
+
+  if (!Object.entries(person).length) {
+    return response.status(400).json({
+      error: 'person content in missing'
+    })
+  }
+
+  const newPerson = new Person({
+    name: person.name,
+    number: person.number
+  })
+
+  newPerson.save().then(savePerson => response.status(201).json(savePerson))
+})
+
+app.use(handleErrors)
+app.use(notFound)
+
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
