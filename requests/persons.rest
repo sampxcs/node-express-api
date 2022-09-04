@@ -9,7 +9,7 @@ GET http://localhost:3001/persons/630bf5491c43e127af5bef99
 ###
 
 // Delete person
-DELETE http://localhost:3001/persons/630c09c1470a9f0345246b4b
+DELETE http://localhost:3001/persons/630c0b9c1340e7ac8a7756c9
 
 ###
 
@@ -18,8 +18,9 @@ POST http://localhost:3001/persons
 content-type: application/json
 
 {
-    "name": "sample",
-    "number": "333-0032000"
+    "name": "Ian Rosales",
+    "number": "11-12345678",
+    "userId": "6314b2d6fa96e6220e399ed5"
 }
 
 ###

@@ -3,7 +3,11 @@ require('./mongo.js')
 
 const express = require('express')
 const cors = require('cors')
-const Person = require('./models/Person')
+const Sentry = require('@sentry/node')
+const Tracing = require('@sentry/tracing')
+
+const usersRouter = require('./controllers/users')
+const personsRouter = require('./controllers/persons')
 
 const logger = require('./middleware/logger')
 const handleErrors = require('./middleware/handleErrors')
@@ -15,79 +19,32 @@ app.use(cors())
 app.use(express.json())
 app.use(logger)
 
+Sentry.init({
+  dsn: 'https://294071c36bfa4c7bad48d64a530d51fb@o1392317.ingest.sentry.io/6713712',
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Tracing.Integrations.Express({ app })
+  ],
+  tracesSampleRate: 1.0
+})
+
+app.use(Sentry.Handlers.requestHandler())
+app.use(Sentry.Handlers.tracingHandler())
+
 app.get('/', (request, response) => {
-  Person.find({}).then(result => {
-    response.json(result)
-  })
+  response.send('<h1>Phonebook Api</h1>')
 })
 
-app.get('/persons', (request, response) => {
-  Person.find({}).then(result => {
-    response.json(result)
-  })
-})
+app.use('/persons', personsRouter)
+app.use('/users', usersRouter)
 
-app.get('/persons/:id', (request, response, next) => {
-  const id = request.params.id
-  Person.findById(id).then(result => {
-    result ? response.json(result) : next()
-  }).catch(error => {
-    next(error)
-  })
-})
-
-app.put('/persons/:id', (request, response, next) => {
-  const { id } = request.params
-  const person = request.body
-
-  if (!Object.entries(person).length) {
-    return response.status(400).json({
-      error: 'person content in missing'
-    })
-  }
-
-  const newPersonInfo = {
-    name: person.name,
-    number: person.number
-  }
-
-  Person.findByIdAndUpdate(id, newPersonInfo, { new: true }).then(result => {
-    result ? response.status(200).json(result) : next()
-  }).catch(error => {
-    next(error)
-  })
-})
-
-app.delete('/persons/:id', (request, response, next) => {
-  const { id } = request.params
-  Person.findByIdAndDelete(id).then(result => {
-    result ? response.status(204).end() : next()
-  }).catch(error => {
-    next(error)
-  })
-})
-
-app.post('/persons', (request, response) => {
-  const person = request.body
-
-  if (!Object.entries(person).length) {
-    return response.status(400).json({
-      error: 'person content in missing'
-    })
-  }
-
-  const newPerson = new Person({
-    name: person.name,
-    number: person.number
-  })
-
-  newPerson.save().then(savePerson => response.status(201).json(savePerson))
-})
-
+app.use(Sentry.Handlers.errorHandler())
 app.use(handleErrors)
 app.use(notFound)
 
 const PORT = process.env.PORT
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+module.exports = { app, server }
