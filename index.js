@@ -6,6 +6,7 @@ const cors = require('cors')
 const Sentry = require('@sentry/node')
 const Tracing = require('@sentry/tracing')
 
+const loginRouter = require('./controllers/login')
 const usersRouter = require('./controllers/users')
 const personsRouter = require('./controllers/persons')
 
@@ -35,6 +36,7 @@ app.get('/', (request, response) => {
   response.send('<h1>Phonebook Api</h1>')
 })
 
+app.use('/login', loginRouter)
 app.use('/persons', personsRouter)
 app.use('/users', usersRouter)
 

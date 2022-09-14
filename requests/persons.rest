@@ -16,11 +16,11 @@ DELETE http://localhost:3001/persons/630c0b9c1340e7ac8a7756c9
 // Post person
 POST http://localhost:3001/persons
 content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaXNwbGF5TmFtZSI6Ik5pbGthcmJpcyIsIl9pZCI6IjYzMTRiMmQ2ZmE5NmU2MjIwZTM5OWVkNSIsImlhdCI6MTY2MjU5NDM2NCwiZXhwIjoxNjYzMTk5MTY0fQ.CuxagWPzAaZbRUg6PW7YeeV-rniip3bilKimj0zguto
 
 {
     "name": "Ian Rosales",
-    "number": "11-12345678",
-    "userId": "6314b2d6fa96e6220e399ed5"
+    "number": "11-12345678"
 }
 
 ###

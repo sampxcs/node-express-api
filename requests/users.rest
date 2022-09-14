@@ -10,5 +10,17 @@ content-type: application/json
 
 ###
 
+// Login user
+POST http://localhost:3001/login
+content-type: application/json
+
+{
+    "email": "hannafuyu@gmail.com",
+    "password": "31555117"
+}
+
+
+###
+
 // Get all users
 GET http://localhost:3001/users/

@@ -1,4 +1,5 @@
 const personsRouter = require('express').Router()
+const userExtractor = require('../middleware/userExtractor')
 const Person = require('../models/Person')
 const User = require('../models/User')
 
@@ -13,7 +14,7 @@ personsRouter.get('/:id', (request, response, next) => {
   Person.findById(id).then(result => result ? response.json(result) : next()).catch(next)
 })
 
-personsRouter.put('/:id', (request, response, next) => {
+personsRouter.put('/:id', userExtractor, (request, response, next) => {
   const { id } = request.params
   const person = request.body
 
@@ -31,14 +32,15 @@ personsRouter.put('/:id', (request, response, next) => {
   Person.findByIdAndUpdate(id, newPersonInfo, { new: true }).then(result => result ? response.status(200).json(result) : next()).catch(next)
 })
 
-personsRouter.delete('/:id', (request, response, next) => {
+personsRouter.delete('/:id', userExtractor, (request, response, next) => {
   const { id } = request.params
   Person.findByIdAndDelete(id).then(result => result ? response.status(204).end() : next()).catch(next)
 })
 
-personsRouter.post('/', async (request, response, next) => {
+personsRouter.post('/', userExtractor, async (request, response, next) => {
   const person = request.body
-  const user = await User.findById(person.userId)
+  const { userId } = request
+  const user = await User.findById(userId)
 
   if (!person.name || !person.number) {
     return response.status(400).json({
